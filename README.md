@@ -1,2 +1,2 @@
-# CS394N Term Project
-CS 394N: Neural Networks @ UT Austin
+# SWIL Comparisons
+# Research for Xuexin Wei's BBC Lab
