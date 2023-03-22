@@ -119,35 +119,54 @@ def add_output_nodes(ckpt:str, device, num_new_outputs:int=1, arch:str='linear')
     '''
         TODO: Add func and sig description.
     '''
-
+    print(device)
     ckpt = torch.load(ckpt, map_location=device)
 
     if arch == 'linear':
-        # new part of weight matrix
-        new_weights = torch.randn(
-            num_new_outputs, ckpt['output_layer.weight'].shape[1])
-        # new part of bias vector
-        new_biases = torch.randn(num_new_outputs)
+      # new part of weight matrix
+      new_weights = torch.randn(
+          num_new_outputs, ckpt['output_layer.weight'].shape[1])
+      # new part of bias vector
+      new_biases = torch.randn(num_new_outputs)
 
-        # updated output layer weights
-        ckpt['output_layer.weight'] = torch.cat(
-            [ckpt['output_layer.weight'], new_weights], dim=0)
-        # updated output layer biases
-        ckpt['output_layer.bias'] = torch.cat(
-            [ckpt['output_layer.bias'], new_biases], dim=0)
+      # updated output layer weights
+      ckpt['output_layer.weight'] = torch.cat(
+          [ckpt['output_layer.weight'], new_weights], dim=0)
+      # updated output layer biases
+      ckpt['output_layer.bias'] = torch.cat(
+          [ckpt['output_layer.bias'], new_biases], dim=0)
 
-        # updated class total
-        num_outputs = ckpt['output_layer.weight'].shape[0]
-        # flattened image size
-        input_size = ckpt['input_layer.weight'].shape[1]
+      # updated class total
+      num_outputs = ckpt['output_layer.weight'].shape[0]
+      # flattened image size
+      input_size = ckpt['input_layer.weight'].shape[1]
         
-        print("input_size", input_size)
-        print("num_outputs", num_outputs)
+      print("input_size", input_size)
+      print("num_outputs", num_outputs)
 
-        new_model = nets.LinearFashionMNIST_alt(input_size, num_outputs)
-        new_model.load_state_dict(ckpt)
+      new_model = nets.LinearFashionMNIST_alt(input_size, num_outputs)
+      new_model.load_state_dict(ckpt)
+    elif arch =='cnn':
+      # new part of weight matrix
+      new_weights = torch.randn(
+          num_new_outputs, ckpt['fc_block.fc3.weight'].shape[1], device=device)
+      # new part of bias vector
+      new_biases = torch.randn(num_new_outputs, device=device)
+
+      # updated output layer weights
+      ckpt['fc_block.fc3.weight'] = torch.cat(
+          [ckpt['fc_block.fc3.weight'], new_weights], dim=0)
+      # updated output layer biases
+      ckpt['fc_block.fc3.bias'] = torch.cat(
+          [ckpt['fc_block.fc3.bias'], new_biases], dim=0)
+
+      # updated class total
+      num_outputs = ckpt['fc_block.fc3.weight'].shape[0]
+
+      new_model = nets.CNN_3B(num_outputs)
+      new_model.load_state_dict(ckpt)
     else:
-        raise ArchitectureError(arch)
+      raise ArchitectureError(arch)
 
     return new_model
 

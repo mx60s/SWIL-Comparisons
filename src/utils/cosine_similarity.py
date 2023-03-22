@@ -152,4 +152,4 @@ def get_avg_activations(model, dataset, classes, layer, device, batch_size=32):
             #avg_activations.append(np.mean(class_activations.numpy(), axis=0))
             X = torch.cat((X, torch.flatten(class_activations,1)), dim=0)
     # Return per class average activation avg from LDA space
-    return get_lda_avgs(X.numpy(), y)
+    return get_lda_avgs(X.cpu().numpy(), y)
