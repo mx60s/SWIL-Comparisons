@@ -6,6 +6,8 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from torch import nn
 from torch.utils.data import DataLoader
 
+from torchvision.models.feature_extraction import create_feature_extractor
+
 from utils.feature_extractor import *
 
 
@@ -104,8 +106,9 @@ def generate_dls(dl : DataLoader, classes: []):
     return class_subsets, classes_idxs, subset_size
 
 
-def get_avg_activations(model, dataset, classes, layer, device, batch_size=32):
-    feature_extractor = FeatureExtractor(model, layers=layer).to(device)
+def get_avg_activations(model, dataset, classes, layers, device, batch_size=32):
+    feature_extractor = create_feature_extractor(model, return_nodes=layers)
+    #feature_extractor = FeatureExtractor(model, layers=layer).to(device)
     targets = np.array(dataset.targets)
     # Stores late layer activations
     X = torch.Tensor().to(device)
@@ -139,7 +142,7 @@ def get_avg_activations(model, dataset, classes, layer, device, batch_size=32):
                 batch_activations = feature_extractor(imgs)
                 # Add batch activations to class activation tensor
                 class_activations = torch.cat(
-                    (class_activations, batch_activations[layer[0]]), dim=0)
+                    (class_activations, batch_activations[layers[0]]), dim=0)
 
                 # Append batch's labels to the label array
                 labels = np.full((len(batch)), cls)
